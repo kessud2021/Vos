@@ -60,6 +60,7 @@ endif()
 
 # Build single OS image (not separate binaries)
 add_subdirectory(kernel)
+add_subdirectory(library)       # VOS integration library
 # add_subdirectory(shell)       # TODO: Integrate shell into kernel
 # add_subdirectory(utils)
 # add_subdirectory(lib)
