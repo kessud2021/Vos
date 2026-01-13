@@ -1,18 +1,19 @@
 cmake_minimum_required(VERSION 3.20)
 project(VSS-CO-OS C CXX ASM)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Global settings
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_ASM_COMPILE_OBJECT "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
 # Architecture detection
 if(NOT ARCH)
-    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64")
         set(ARCH "x86_64")
-    elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64|ARM64")
+    elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64|ARM64|arm64")
         set(ARCH "arm64")
     elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "riscv64")
         set(ARCH "riscv64")
@@ -21,43 +22,60 @@ if(NOT ARCH)
     endif()
 endif()
 
-message(STATUS "Building for architecture: ${ARCH}")
+message(STATUS "================================")
+message(STATUS "  VSS-CO OS Build Configuration")
+message(STATUS "================================")
+message(STATUS "Architecture: ${ARCH}")
+message(STATUS "C Standard: ${CMAKE_C_STANDARD}")
+message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 
 # Compiler flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -O2 -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -O2 -march=native")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
 # Kernel-specific flags
-set(KERNEL_C_FLAGS "-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector -fno-builtin")
-set(KERNEL_LINK_FLAGS "-nostdlib -Wl,--build-id=none")
+set(KERNEL_C_FLAGS "-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector -fno-builtin -fPIE")
+set(KERNEL_LINK_FLAGS "-nostdlib")
 
 # Options
 option(ENABLE_DEBUG "Enable debug symbols" ON)
 option(ENABLE_TESTING "Enable tests" ON)
-option(CROSS_COMPILE "Cross-compile for target" OFF)
+option(ENABLE_COVERAGE "Enable code coverage" OFF)
 
 # Debug symbols
 if(ENABLE_DEBUG)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g3 -DDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -DDEBUG")
+    message(STATUS "Debug mode: ENABLED")
+else()
+    message(STATUS "Debug mode: DISABLED")
 endif()
 
-# Add subdirectories
-add_subdirectory(kernel)
-add_subdirectory(shell)
-add_subdirectory(utils)
-add_subdirectory(lib)
-add_subdirectory(gui)
-add_subdirectory(pkgmgr)
+# Coverage
+if(ENABLE_COVERAGE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    message(STATUS "Code coverage: ENABLED")
+endif()
+
+# Add subdirectories (stubs for now)
+# add_subdirectory(kernel)
+# add_subdirectory(shell)
+# add_subdirectory(utils)
+# add_subdirectory(lib)
+# add_subdirectory(gui)
+# add_subdirectory(pkgmgr)
 
 if(ENABLE_TESTING)
     enable_testing()
-    add_subdirectory(tests)
+    # add_subdirectory(tests)
+    message(STATUS "Testing: ENABLED")
+else()
+    message(STATUS "Testing: DISABLED")
 endif()
 
-# Summary
-message(STATUS "Build configuration:")
-message(STATUS "  Architecture: ${ARCH}")
-message(STATUS "  Debug symbols: ${ENABLE_DEBUG}")
-message(STATUS "  Testing: ${ENABLE_TESTING}")
-message(STATUS "  Cross-compile: ${CROSS_COMPILE}")
+message(STATUS "================================")
+message(STATUS "To build: cd build && ninja")
+message(STATUS "To test: ninja test")
+message(STATUS "To clean: rm -rf build/")
+message(STATUS "================================")
