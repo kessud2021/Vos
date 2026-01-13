@@ -1,0 +1,48 @@
+# Build directories
+build/
+dist/
+cmake-build-*/
+.vscode/
+
+# Compiled objects
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.obj
+*.exe
+*.bin
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+extern/
+vendor/
+.conan/
+
+# Test outputs
+*.gcov
+*.gcda
+*.gcno
+coverage/
+test-results/
+
+# Documentation
+docs/_build/
+*.pdf
+*.epub
+
+# Package manager
+pkgmgr/vendor/
+go.sum
+go.mod
+
+# OS-specific
+Thumbs.db
+.#*
