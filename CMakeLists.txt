@@ -63,7 +63,7 @@ add_subdirectory(kernel)
 # add_subdirectory(shell)       # TODO: Integrate shell into kernel
 # add_subdirectory(utils)
 # add_subdirectory(lib)
-# add_subdirectory(gui)
+add_subdirectory(gui)
 # add_subdirectory(pkgmgr)
 
 # Test harness (runs kernel on Windows without virtualization)
