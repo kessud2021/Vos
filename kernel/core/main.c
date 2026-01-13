@@ -20,47 +20,62 @@ extern uint8_t __bss_end[];
  * Sets up all subsystems, mounts root filesystem, and starts init process.
  */
 void kernel_main(void) {
-    pr_info("VSS-CO OS Kernel booting...\n");
+    pr_info("VSS-CO OS Kernel v1.0\n");
+    pr_info("================================================\n\n");
 
     /* Initialize architecture */
+    pr_info("Initializing CPU...\n");
     init_cpu();
-    pr_info("CPU initialized\n");
+    pr_info("✓ CPU initialized\n\n");
 
     /* Initialize memory management */
+    pr_info("Initializing memory management...\n");
     init_memory();
-    pr_info("Memory management initialized\n");
+    pr_info("✓ Memory management initialized\n\n");
 
     /* Initialize process scheduler */
+    pr_info("Initializing scheduler...\n");
     init_scheduler();
-    pr_info("Scheduler initialized\n");
+    pr_info("✓ Scheduler initialized\n\n");
 
     /* Initialize virtual filesystem */
+    pr_info("Initializing VFS...\n");
     init_vfs();
-    pr_info("VFS initialized\n");
+    pr_info("✓ VFS initialized\n\n");
 
     /* Initialize device drivers */
+    pr_info("Initializing drivers...\n");
     init_drivers();
-    pr_info("Drivers initialized\n");
+    pr_info("✓ Drivers initialized\n\n");
 
     /* Mount root filesystem */
+    pr_info("Mounting root filesystem...\n");
     int ret = mount_fs("/dev/root", "/", "ext4");
     if (ret < 0) {
-        pr_panic("Failed to mount root filesystem\n");
+        pr_err("Failed to mount root filesystem\n\n");
+        pr_info("Kernel initialization complete (test mode)\n");
+        pr_info("================================================\n");
+        return;
     }
-    pr_info("Root filesystem mounted\n");
+    pr_info("✓ Root filesystem mounted\n\n");
 
     /* Create and start init process (PID 1) */
+    pr_info("Forking init process...\n");
     pid_t init_pid = do_fork();
     if (init_pid == 0) {
         /* Child process: exec /sbin/init */
+        pr_info("Executing /sbin/init...\n");
         char *init_args[] = { "/sbin/init", NULL };
         do_exec("/sbin/init", init_args);
         /* Should not return */
         pr_panic("Failed to exec /sbin/init\n");
     } else if (init_pid > 0) {
-        pr_info("Init process started (PID %d)\n", init_pid);
+        pr_info("✓ Init process started (PID %d)\n\n", init_pid);
     } else {
-        pr_panic("Failed to fork init process\n");
+        pr_err("Failed to fork init process\n\n");
+        pr_info("Kernel initialization complete (test mode)\n");
+        pr_info("================================================\n");
+        return;
     }
 
     /* Start the scheduler */
@@ -189,25 +204,12 @@ void init_drivers(void) {
  *
  * Kernel logging functions
  * Outputs to console during boot, to syslog later
+ * 
+ * These are defined in the test harness or bootloader
  */
 
-void pr_info(const char *fmt, ...) {
-    /* TODO: Implement printf-style formatting */
-    /* For now, stub */
-}
-
-void pr_err(const char *fmt, ...) {
-    /* TODO: Implement printf-style formatting */
-}
-
-void pr_debug(const char *fmt, ...) {
-    #ifdef DEBUG
-    /* TODO: Implement printf-style formatting */
-    #endif
-}
-
-void pr_panic(const char *fmt, ...) {
-    /* Print error, disable interrupts, halt */
-    extern void halt(void);
-    halt();
-}
+/* Declared but defined elsewhere */
+extern void pr_info(const char *fmt, ...);
+extern void pr_err(const char *fmt, ...);
+extern void pr_debug(const char *fmt, ...);
+extern void pr_panic(const char *fmt, ...);

@@ -20,10 +20,12 @@ target_sources(kernel-core PRIVATE
     core/memory.c
     core/ipc.c
     core/sync.c
+    core/process.c
     fs/vfs.c
     fs/ext4.c
     drivers/console.c
     drivers/block.c
+    drivers/pci.c
     mm/page.c
     mm/vma.c
     lib/string.c
@@ -36,23 +38,25 @@ target_include_directories(kernel-core PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/arch/${ARCH}/include
 )
 
-# Kernel-specific flags
+# Kernel-specific flags (just basic for now)
 target_compile_options(kernel-core PRIVATE
-    ${KERNEL_C_FLAGS}
     -fno-omit-frame-pointer
 )
 
 # Kernel ELF
-add_executable(kernel-elf)
-target_sources(kernel-elf PRIVATE kernel-entry.c)
+add_executable(kernel-elf kernel-entry.c)
 target_link_libraries(kernel-elf PRIVATE kernel-core)
-target_link_options(kernel-elf PRIVATE ${KERNEL_LINK_FLAGS})
 
-# Linker script
-target_link_options(kernel-elf PRIVATE -T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld)
-
-# Create bootable image
-add_custom_command(TARGET kernel-elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:kernel-elf> ${CMAKE_BINARY_DIR}/kernel.bin
-    COMMENT "Creating kernel binary"
+# Link against linker script
+set_target_properties(kernel-elf PROPERTIES
+    LINK_FLAGS "-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld"
 )
+target_link_options(kernel-elf PRIVATE -nostdlib -fno-builtin)
+
+# Create bootable binary image
+add_custom_command(TARGET kernel-elf POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:kernel-elf> ${CMAKE_BINARY_DIR}/os
+    COMMENT "Creating bootable OS image: os"
+)
+
+message(STATUS "Kernel: Building bootable OS image")

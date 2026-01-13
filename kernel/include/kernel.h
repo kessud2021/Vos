@@ -27,12 +27,12 @@ void pr_debug(const char *fmt, ...);
 void pr_panic(const char *fmt, ...);
 
 /* Error codes (kernel) */
-#define -ENOMEM     -12
-#define -ENOENT     -2
-#define -EACCES     -13
-#define -EBUSY      -16
-#define -EINVAL     -22
-#define -ENOTIMPL   -38
+#define ENOMEM      12
+#define ENOENT      2
+#define EACCES      13
+#define EBUSY       16
+#define EINVAL      22
+#define ENOTIMPL    38
 
 /* PID & TID */
 typedef int32_t pid_t;

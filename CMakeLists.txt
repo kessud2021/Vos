@@ -33,9 +33,9 @@ message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
-# Kernel-specific flags
-set(KERNEL_C_FLAGS "-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector -fno-builtin -fPIE")
-set(KERNEL_LINK_FLAGS "-nostdlib")
+# Kernel-specific flags (split to avoid issues)
+set(KERNEL_C_FLAGS "-fno-stack-protector -fno-builtin")
+set(KERNEL_LINK_FLAGS "")
 
 # Options
 option(ENABLE_DEBUG "Enable debug symbols" ON)
@@ -58,18 +58,23 @@ if(ENABLE_COVERAGE)
     message(STATUS "Code coverage: ENABLED")
 endif()
 
-# Add subdirectories (stubs for now)
-# add_subdirectory(kernel)
-# add_subdirectory(shell)
+# Build single OS image (not separate binaries)
+add_subdirectory(kernel)
+# add_subdirectory(shell)       # TODO: Integrate shell into kernel
 # add_subdirectory(utils)
 # add_subdirectory(lib)
 # add_subdirectory(gui)
 # add_subdirectory(pkgmgr)
 
+# Test harness (runs kernel on Windows without virtualization)
+add_executable(test-kernel test-kernel.c)
+target_link_libraries(test-kernel PRIVATE kernel-core)
+target_include_directories(test-kernel PRIVATE kernel/include)
+
 if(ENABLE_TESTING)
     enable_testing()
-    # add_subdirectory(tests)
-    message(STATUS "Testing: ENABLED")
+    # add_subdirectory(tests)  # TODO: Fix libc dependencies
+    message(STATUS "Testing: ENABLED (pending libc)")
 else()
     message(STATUS "Testing: DISABLED")
 endif()

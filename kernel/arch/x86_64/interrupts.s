@@ -1,9 +1,9 @@
-; x86-64 interrupt handlers
+# x86-64 interrupt handlers
 
-section .text
+.section .text
 
-global interrupt_handler
+.global interrupt_handler
 
 interrupt_handler:
-    ; TODO: Save registers, call C handler
+    # TODO: Save registers, call C handler
     ret
